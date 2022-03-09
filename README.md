@@ -37,6 +37,20 @@ You should assemble the device by sticking on the heatsinks, connecting the came
 
 ![pinout](https://i0.wp.com/www.notenoughtech.com/wp-content/uploads/2016/04/Raspberry-Pi-GPIO-Layout-Model-B-Plus-rotated-2700x900.png?fit=640%2C213)
 
+--- 
+
+### RasPi HQ Camera
+
+- 12.3 megapixel sensor
+- 7.9mm diagonal sensor size
+- C/CS mount lenses
+- Connects with CSI
+- Can do pretty cool stuff, high framerate, RAW, etc.
+- No global shutter
+- External Hardware Sync supported! Strobe flash also.
+- About 50€ without a lens
+- We have a telephoto and wide lens. 
+
 ---
 
 ### Raspberry OS
@@ -89,8 +103,21 @@ libcamera-hello -t 0  # “-t 0” for no timeout - run indefinitely
 ```
 Nice! A second window should have opened and should be showing a live video feed from the camera! It's probably blurry though. We'll need to focus the camera to get the resulting image good and sharp. 
 
+We can also use this command line tool to record images and video in various formats. We're not interested in video today, but I think this is a good way of getting familiar with the `gain` and `exposure` parameters of the camera. The `libcamera-still` command will help:
 
-modify config
-download the weights
-into folder
- pip install --upgrade numpy
+```bash
+#  list the options
+libcamera-still —-help 
+#  to take a picture and save it 
+libcamera-still --output <filename.jpg>
+#  for manual exposure control
+libcamera-still —-shutter <us> —-gain <db> --output <filename.jpg>
+```
+
+### Python Library
+
+Unfortunately, the RasPi software is currently in the middle of migrating to a new camera driver. This means that the Python library support is not as good as you would expect. 
+
+Usually almost everything is very easy with RasPis since they're so popular, but this is surprisingly difficult. 
+
+Maybe it's not worth it. Ha!
