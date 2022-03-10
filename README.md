@@ -129,8 +129,14 @@ Maybe it's not worth it. Ha!
 This takes a few minutes to install:
 https://github.com/raspberrypi/picamera2
 
+This is the required build command for libcamera
+```bash
+meson build --buildtype=release -Dpipelines=raspberrypi -Dipas=raspberrypi -Dv4l2=true -Dgstreamer=enabled -Dtest=false -Dlc-compliance=disabled -Dcam=disabled -Dqcam=enabled -Ddocumentation=disabled -Dpycamera=enabled
+```
+
 Good examples of how to get basic programs working.
 We can try to build something that lets us preview the image we're about to take, and then take an image by pressing the spacebar. It should increment the name of the image, and print to the screen so we know how many we've captured so far. It would also be nice to be able to specify a folder to save the images into, and required resolution.
+
 
 ---
 
@@ -192,6 +198,16 @@ This tool allows us to export our annotations in a format that YOLO will underst
 
 We can create a label `connector` by clicking the `+` button, and then all the images should be labelled. This should be as pixel-accurate as possible, good training data makes for good networks.
 
+When we've labelled all data, we can download the data in YOLO format as a zip. This zip contains a `txt` file for each image that was labelled. 
+
+Their contents should look something like this: 
+```
+0 0.441748 0.512928 0.531823 0.649270
+```
+the first value is the class ID, the second and third values are the X and Y coordinates (as a fraction of the image) of the centre of the rectangle, of size the last two numbers (also as a fraction of the image, width and height).
+
+
+---
 
 ## Training
 
@@ -204,7 +220,7 @@ htop
 
 ---
 
-### Scaled YOLOv4
+## Scaled YOLOv4
 Scaled YOLOv4 is a pytorch based implementation of the YOLO 
 ```
 git clone https://github.com/aschenbecherwespe/ScaledYOLOv4
@@ -251,7 +267,67 @@ We might need to manually upgrade numpy, also:
 pip install --upgrade numpy
 ```
 
+We use the `train.py` script to do our training. Descriptions for available options can be found with: 
+
+```bash
+python3 train.py --help
+```
+
 To start training:
+
 ```bash
 python3 train.py --data ./data/coco.yaml --weights weights/yolov4-p5.pt  --device 'cpu' --epochs 1 #--batch 1
 ```
+
+
+
+--- 
+
+## Basic Inference
+
+Let's use `ipython` to walk step by step through the process of taking an image and running the AI on it, using our pretrained model.
+
+```
+pip install -U ipython
+ipython
+```
+
+We've created a helper module in `helper.py` to modify the network before we load it. This is due to being trained on a GPU, the network uses some functions that aren't available on CPU, but we can replace them before using the model:
+
+
+```python
+import torch
+from mish_cuda import MishCuda
+from helper import replace_mish_layers, revert_sync_batchnorm
+import cv2
+
+#load and setup model
+model = torch.load('home/pi/ScaledYOLOv4/final_model.pt', map_location=torch.device('cpu'))
+replace_mish_layers(model['model'], MishCuda, torch.nn.Mish())
+model = reverse_sync_batchnorm(model['model'])
+model = model.float().fuse().eval()
+
+# load image
+img_path = '/home/pi/test.jpg'
+img = cv2.imread(img_path)
+transposed = img[:, :, ::-1].transpose(2, 0, 1)
+
+
+# reformat image
+contiguous = np.ascontiguousarray(transposed)
+torch_img = torch.from_numpy(contiguous).to('cpu')
+torch_float = torch_img.float()
+torch_normalized = torch_float / 255.0
+unsqueezed = torch_float.unsqueeze(0)
+
+# get a prediction
+start = time.perf_counter()
+pred = model(unsqueezed)[0]
+end = time.perf_counter()
+print('prediction took %f seconds.', end - start)
+non_maxed = non_max_suppression(pred)
+output = output_to_target(non_maxed)
+
+print(output)
+```
+
