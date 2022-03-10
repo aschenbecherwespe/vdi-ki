@@ -156,12 +156,12 @@ from null_preview import *
 picam2 = Picamera2()
 config = picam2.still_configuration()
 picam2.configure(config)
-#preview = QtGlPreview(picam2)
+preview = QtGlPreview(picam2)
 
-#preview_config = picam2.preview_configuration()
-#picam2.configure(preview_config)
+preview_config = picam2.preview_configuration()
+picam2.configure(preview_config)
 
-preview = NullPreview(picam2)
+#preview = NullPreview(picam2)
 
 picam2.start()
 time.sleep(1)
@@ -302,7 +302,7 @@ from utils.general import non_max_suppression, output_to_target
 from helper import replace_mish_layers, revert_sync_batchnorm
 import cv2
 
-#load and setup model
+# load and setup model
 model = torch.load('home/pi/ScaledYOLOv4/final_model.pt', map_location=torch.device('cpu'))
 replace_mish_layers(model['model'], MishCuda, torch.nn.Mish())
 model = reverse_sync_batchnorm(model['model'])
