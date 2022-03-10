@@ -114,10 +114,142 @@ libcamera-still --output <filename.jpg>
 libcamera-still —-shutter <us> —-gain <db> --output <filename.jpg>
 ```
 
-### Python Library
+---
+
+## Software/Driver Setup 
 
 Unfortunately, the RasPi software is currently in the middle of migrating to a new camera driver. This means that the Python library support is not as good as you would expect. 
 
 Usually almost everything is very easy with RasPis since they're so popular, but this is surprisingly difficult. 
 
 Maybe it's not worth it. Ha!
+
+## Python Library
+
+This takes a few minutes to install:
+https://github.com/raspberrypi/picamera2
+
+Good examples of how to get basic programs working.
+We can try to build something that lets us preview the image we're about to take, and then take an image by pressing the spacebar. It should increment the name of the image, and print to the screen so we know how many we've captured so far. It would also be nice to be able to specify a folder to save the images into, and required resolution.
+
+---
+
+## Recording Data
+
+Use your program to record as many images as you can before you get bored. When we've got a nice variety of images, with varying angles and light conditions, we can start to label the data.
+
+
+```python
+import time
+import threading
+
+from qt_gl_preview import *
+from picamera2 import *
+from null_preview import *
+
+picam2 = Picamera2()
+config = picam2.still_configuration()
+picam2.configure(config)
+#preview = QtGlPreview(picam2)
+
+#preview_config = picam2.preview_configuration()
+#picam2.configure(preview_config)
+
+preview = NullPreview(picam2)
+
+picam2.start()
+time.sleep(1)
+
+metadata = picam2.capture_metadata()
+controls = {c : metadata[c] for c in ["ExposureTime", "AnalogueGain", "ColourGains"]}
+print(controls)
+
+picam2.set_controls(controls)
+
+count = 0
+
+while True:
+    #key = input("push space to capture")
+    #if key == ' ':
+    name = f"{int(time.time() * 1000)}.jpg"
+    count += 1
+    print(f'capturing with name: {name}, count: {count}')
+    picam2.capture_file(name)
+
+
+#threading.Thread(target = control_thread).start()
+```
+
+---
+
+### Labelling Data
+
+We'll use the [MakeSense.AI](https://makesense.ai) tool to label our images. Open it in the Chromium web browser on your Pi, click "get started" and select `object detection` 
+ - object detection allows selection of areas of interest on an image
+ - image recognition allows assigning labels to each image
+
+This tool allows us to export our annotations in a format that YOLO will understand, we just need to add the generated text files in the same folder with our images, after extracting them from the zip file.
+
+We can create a label `connector` by clicking the `+` button, and then all the images should be labelled. This should be as pixel-accurate as possible, good training data makes for good networks.
+
+
+## Training
+
+To train we first need to organise our training data. We need to split the data into three (train, test and validate) groups. 
+
+Monitor performance with
+```bash
+htop
+```
+
+### Scaled YOLOv4
+Scaled YOLOv4 is a pytorch based implementation of the YOLO 
+```
+git clone https://github.com/aschenbecherwespe/ScaledYOLOv4
+```
+
+Dowload the pretrained [weights](https://drive.google.com/file/d/1aXZZE999sHMP1gev60XhNChtHPRMH3Fz/view?usp=sharing) and save them into a `weights` folder in the yolo folder.
+
+
+Modify our settings `yaml`
+In the `ScaledYOLOv4/data` directory, copy the `coco.yaml` file and rename it to `vdi.yaml`
+In this file we'll need to point our training infrastructure to the three folders we made earlier: 
+```
+/home/pi/data/train/
+/home/pi/data/val/
+/home/pi/data/test/
+```
+
+We also need up update the class `names`, remove the existing ones and replace with our new, single class, and update the number of classes variable: `nc`.
+
+
+Install the needed python packages - save this into a file, `requirements.txt`
+
+```requirements.txt
+git+https://github.com/aschenbecherwespe/mish-cuda-dummy
+numpy==1.21.2
+opencv-python==4.5.5.62
+wheel==0.37.1
+scikit_image==0.19.1
+tensorboard==2.8.0
+tqdm==4.63.0
+matplotlib==3.5.1
+torch==1.10.2
+torchvision==0.11.3
+torchaudio==0.10.2
+```
+
+and install via pip:
+```bash
+pip install -U -r requirements.txt
+```
+
+We might need to manually upgrade numpy, also:
+```bash
+pip install --upgrade numpy
+```
+
+To start training:
+```bash
+python3 train.py --data ./data/coco.yaml --weights weights/yolov4-p5.pt  --device 'cpu' --epochs 1 #--batch 1
+```
