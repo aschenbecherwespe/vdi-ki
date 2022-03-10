@@ -299,7 +299,7 @@ pip install -U ipython
 ipython
 ```
 
-Download the model from [here.](https://we.tl/t-2RFh9jd4jb)
+Download the model from [here.](https://we.tl/t-2RFh9jd4jb) And rename it to `final_model.pt`, it should be put in the ScaledYOLOv4 directory.
 
 We've created a helper module in `helper.py` to modify the network before we load it. This is due to being trained on a GPU, the network uses some functions that aren't available on CPU, but we can replace them before using the model:
 
