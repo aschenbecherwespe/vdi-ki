@@ -37,6 +37,7 @@ def revert_sync_batchnorm(module):
     del module
     return module_output
 
+
 def replace_mish_layers(model, old, new):
     '''not needed, probably, we should use the dummy module instead'''
     for n, module in model.named_children():
