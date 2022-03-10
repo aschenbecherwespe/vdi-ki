@@ -182,7 +182,7 @@ while True:
 
 ---
 
-### Labelling Data
+## Labelling Data
 
 We'll use the [MakeSense.AI](https://makesense.ai) tool to label our images. Open it in the Chromium web browser on your Pi, click "get started" and select `object detection` 
  - object detection allows selection of areas of interest on an image
@@ -202,13 +202,15 @@ Monitor performance with
 htop
 ```
 
+---
+
 ### Scaled YOLOv4
 Scaled YOLOv4 is a pytorch based implementation of the YOLO 
 ```
 git clone https://github.com/aschenbecherwespe/ScaledYOLOv4
 ```
 
-Dowload the pretrained [weights](https://drive.google.com/file/d/1aXZZE999sHMP1gev60XhNChtHPRMH3Fz/view?usp=sharing) and save them into a `weights` folder in the yolo folder.
+Download the pretrained [weights](https://drive.google.com/file/d/1aXZZE999sHMP1gev60XhNChtHPRMH3Fz/view?usp=sharing) and save them into a `weights` folder in the yolo folder.
 
 
 Modify our settings `yaml`
