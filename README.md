@@ -261,6 +261,7 @@ matplotlib==3.5.1
 torch==1.10.2
 torchvision==0.11.3
 torchaudio==0.10.2
+pyyaml==6.0
 ```
 
 and install via pip:
