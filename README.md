@@ -308,11 +308,13 @@ We've created a helper module in `helper.py` to modify the network before we loa
 import torch
 from mish_cuda import MishCuda
 from utils.general import non_max_suppression, output_to_target, plot_images
-from helper import replace_mish_layers, revert_sync_batchnorm
+from helper import replace_mish_layers, reverse_sync_batchnorm
+import numpy as np
+import time
 import cv2
 
 # load and setup model
-model = torch.load('home/pi/ScaledYOLOv4/final_model.pt', map_location=torch.device('cpu'))
+model = torch.load('/home/pi/ScaledYOLOv4/final_model.pt', map_location=torch.device('cpu'))
 replace_mish_layers(model['model'], MishCuda, torch.nn.Mish())
 model = reverse_sync_batchnorm(model['model'])
 model = model.float().fuse().eval()
