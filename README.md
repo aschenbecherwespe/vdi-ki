@@ -283,7 +283,7 @@ python3 train.py --help
 To start training:
 
 ```bash
-python3 train.py --data ./data/vdi.yaml --weights weights/yolov4-p5.pt  --device 'cpu' --epochs 1 #--batch 1
+python3 train.py --data ./data/vdi.yaml --weights weights/yolov4-p5.pt  --device 'cpu' --epochs 1 --batch 1
 ```
 
 
