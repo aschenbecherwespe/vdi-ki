@@ -1,6 +1,8 @@
 # A.I. on an RPi
 _by Ciaran Moyne (PANDA GmbH), for VDI_
 
+[https://github.com/aschenbecherwespe/vdi-ki](https://github.com/aschenbecherwespe/vdi-ki)
+
 10.03.22
 
 ---
@@ -198,7 +200,7 @@ We'll use the [MakeSense.AI](https://makesense.ai) tool to label our images. Ope
 
 This tool allows us to export our annotations in a format that YOLO will understand, we just need to add the generated text files in the same folder with our images, after extracting them from the zip file.
 
-We can create a label `connector` by clicking the `+` button, and then all the images should be labelled. This should be as pixel-accurate as possible, good training data makes for good networks.
+We can create labels `connector`, `cup` and `sink` by clicking the `+` button, and then all the images should be labelled. Each label denotes a class in the network. This should be as pixel-accurate as possible, good training data makes for good networks.
 
 When we've labelled all data, we can download the data in YOLO format as a zip. This zip contains a `txt` file for each image that was labelled. 
 
@@ -223,12 +225,14 @@ htop
 ---
 
 ## Scaled YOLOv4
+
 Scaled YOLOv4 is a pytorch based implementation of the YOLO 
 ```
 git clone https://github.com/aschenbecherwespe/ScaledYOLOv4
 ```
 
 Download the pretrained [weights](https://drive.google.com/file/d/1aXZZE999sHMP1gev60XhNChtHPRMH3Fz/view?usp=sharing) and save them into a `weights` folder in the yolo folder.
+
 
 
 Modify our settings `yaml`
@@ -293,6 +297,8 @@ Let's use `ipython` to walk step by step through the process of taking an image 
 pip install -U ipython
 ipython
 ```
+
+Download the model from [here.](https://we.tl/t-2RFh9jd4jb)
 
 We've created a helper module in `helper.py` to modify the network before we load it. This is due to being trained on a GPU, the network uses some functions that aren't available on CPU, but we can replace them before using the model:
 
