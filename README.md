@@ -20,6 +20,8 @@ Today we'll cover:
 
 ### Raspberry Pi Hardware Setup
 
+[See Also.](https://www.okdo.com/getstarted)
+
 The `Raspberry Pi` is a single board computer that was first released 10 years ago. It's a very low powered device, with a very small form factor, yet it runs a full Linux operating system with standard PC input/output devices (`USB`, `Ethernet`, `Display` and `audio` ports). The Pi 4B, which we're using, is the latest generation. It is the first version which has a choice of different amounts of onboard RAM. 
 These are the 8GB variants. Typically they cost about 80€, but with the chip shortage, their price is (hopefully temporarily) currently much higher. 
 
