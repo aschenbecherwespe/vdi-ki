@@ -300,7 +300,7 @@ We've created a helper module in `helper.py` to modify the network before we loa
 ```python
 import torch
 from mish_cuda import MishCuda
-from utils.general import non_max_suppression, output_to_target
+from utils.general import non_max_suppression, output_to_target, plot_images
 from helper import replace_mish_layers, revert_sync_batchnorm
 import cv2
 
@@ -330,7 +330,8 @@ end = time.perf_counter()
 print('prediction took %f seconds.', end - start)
 non_maxed = non_max_suppression(pred)
 output = output_to_target(non_maxed)
-
 print(output)
+plot_images([torch_normalized], [output])
+
 ```
 
