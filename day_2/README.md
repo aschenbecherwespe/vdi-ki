@@ -96,8 +96,12 @@ squared.thumbnail(maxsize, PIL.Image.ANTIALIAS)
 # note, this operation occurs inplace, so the larger image is gone
 ```
 
-### pil to 
+## pil to disk
 
+```python
+# save the image to storage (and convert it to RGB - removing the alpha channel)
+image.convert('RGB').save('/home/pi/ScaledYOLOv4/input.jpg')
+```
 
 
 ## Publishing Results
