@@ -175,7 +175,8 @@ and then download and start influx:
 ```bash
 sudo docker run -d \
 -p 8086:8086 \
--v /data/influx:/var/lib/influxdb2
+-v /data/influx:/var/lib/influxdb2 \
+influxdb
 ```
 
 We can check it's running by visiting [http://localhosLt:8086](http://localhost:8086) and here we'll need to configure our credentials. 
