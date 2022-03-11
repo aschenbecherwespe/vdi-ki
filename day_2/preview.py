@@ -13,5 +13,10 @@ preview = QtGlPreview(picam2)
 preview_config = picam2.preview_configuration()
 picam2.configure(preview_config)
 
+capture_config = picam2.still_configuration()
+picam2.configure(capture_config)
+
 picam2.start()
-time.sleep(5)
+
+# load image
+image = picam2.switch_mode_and_capture_image(capture_config)
