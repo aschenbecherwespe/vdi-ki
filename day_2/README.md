@@ -152,8 +152,9 @@ pip install minio
 
 in python:
 ```python
-client = minio.Minio('localhost:9000/', 'minioadmin', 'minioadmin', secure=False)
+import minio
 
+client = minio.Minio('localhost:9000/', 'minioadmin', 'minioadmin', secure=False)
 
 with open('P1.png', 'rb') as infile:
     data = infile.read()
