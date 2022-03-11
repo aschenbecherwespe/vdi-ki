@@ -207,3 +207,22 @@ write_api.write(bucket=bucket, org=org, record=p)
 
 ```
 
+
+## Upgrading YOLO
+
+We need now to put the prediction part of YOLO into an infinite loop. 
+Each cycle of the loop, we'd like to read the input image from the capture tool, pass it to the neural network, and publish the results to influxdb.
+We also should publish the prediction and input images to minio. 
+Each of these data points should share some reference, like a timestamp `int(time.tim())`, so for example call the images:
+```
+<timestamp>_input.jpg
+<timestamp>_prediction.jpg
+```
+and include these parameters in the influx entry. 
+
+To interpret the results of the network we can use:
+```python
+classid, _, x, y, w, h, conf = output[0]
+```
+
+...in the live prediction file.
