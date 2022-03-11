@@ -1,13 +1,9 @@
 # Inference
 
-Running ipython interpreter:
+## installing the raspi python library
 
-```bash 
-python -m IPython
-```
 
-installing the camera drivers:
-installing buidl dependencies:
+installing build dependencies:
 
 ```bash
 sudo pip install jinja2 pyyaml ply
@@ -19,12 +15,90 @@ sudo apt install -y libglib2.0-dev libgstreamer-plugins-base1.0-dev
 install the libcamera library:
 ```bash
 cd
-git clone git://linuxtv.org/libcamera.git
+git clone --branch picamera2 https://github.com/raspberrypi/libcamera.git
 cd libcamera
-meson build --buildtype=release -Dpipelines=raspberrypi -Dipas=raspberrypi -Dv4l2=true -Dgstreamer=enabled -Dtest= -Dlc-compliance=disabled -Dcam=disabled -Dqcam=enabled -Ddocumentation=disabled -Dpycamera=enabled
+# next we configure the build of the camera library
+meson build --buildtype=release -Dpipelines=raspberrypi -Dipas=raspberrypi -Dv4l2=true -Dgstreamer=enabled -Dtest=false -Dlc-compliance=disabled -Dcam=disabled -Dqcam=enabled -Ddocumentation=disabled -Dpycamera=enabled
+# compile and install
 ninja -C build
 sudo ninja -C build install
 ```
+
+i'm not actually sure what this one is for, it's like some sort of drm kernel driver i think. 
+```bash
+cd
+git clone https://github.com/tomba/kmsxx.git
+cd kmsxx
+git submodule update --init
+sudo apt install -y libfmt-dev libdrm-dev
+meson build
+ninja -C build
+```
+next install raspi's version of python v4l2 (video for linux library)
+
+```bash
+cd
+git clone https://github.com/RaspberryPiFoundation/python-v4l2.git
+```
+
+and now finally, the actual python library for the camera
+```bash
+cd
+sudo pip3 install pyopengl
+sudo apt install -y python3-pyqt5
+git clone https://github.com/raspberrypi/picamera2.git
+```
+
+put this line into the bottom of the file `/home/pi/.bashrc`, to include these new libraries in your python path:
+```bash
+export PYTHONPATH=/home/pi/picamera2:/home/pi/libcamera/build/src/py:/home/pi/kmsxx/build/py:/home/pi/python-v4l2
+```
+
+now reboot.
+
+next, check out and run the `preview.py` example code to make sure that everthing has worked okay. It should show the preview window for 5 seconds.
+
+NOTE: the installation instructions are derived from [this page](https://github.com/raspberrypi/picamera2), they're going to change in the future as the picamera2 python library matures. this is just a preview build, so there might be some stability issues, but hopefully not too many! 
+
+capturing an image we can use in yolo:
+
+the model is trained to take images of resolution `416x416`, so first we should crop the image: 
+```python
+def crop_square(im):
+    width, height = im.size   # Get dimensions
+
+    # lets take the shorter side of image and crop to that
+    new_longest = min(width, height) 
+
+    left = (width - new_longest)/2
+    top = (height - new_longest)/2
+    right = (width + new_longest)/2
+    bottom = (height + new_longest)/2
+
+    # Crop the center of the image
+    im = im.crop((left, top, right, bottom))
+
+    return im
+
+# lets test it
+
+image = picam2.switch_mode_and_capture_image(capture_config)
+squared = crop_square(image)
+squared.size # both dimensions should be the same
+```
+we also need to resize the image, this should be done with antialilasing (otherwise the image will look terrible)
+
+```python
+import PIL
+maxsize = (416, 416)
+
+squared.thumbnail(maxsize, PIL.Image.ANTIALIAS)
+# note, this operation occurs inplace, so the larger image is gone
+```
+
+### pil to 
+
+
 
 ## Publishing Results
 
@@ -108,12 +182,24 @@ next we'll install the influx client:
 pip install influxdb-client
 ```
 
+and using it is easy:
+```
+import influxdb_client
+from influxdb_client.client.write_api import SYNCHRONOUS
+
+bucket="predictions"
+org="vdi"
+token="Dm_E_p6wLWxO2st-pefO7YEqLusl938By2zhbM9YmRTx2omBtw2X7-CcbI6jh1LTQ_6e0YylPZZsP5Hz_X5Dfw=="
+url="http://localhost:8086"
+
+client = influxdb_client.InfluxDBClient( url=url, token=token, org=org)
+
+write_api = client.write_api(write_options=SYNCHRONOUS)
+
+p = influxdb_client.Point("measurement").field('hello', "world").field('value', 3.14)
+
+write_api.write(bucket=bucket, org=org, record=p)
 
 
-automatically collect image based on timer? 
-run prediction
-stream results via fast api
-push data into influx
-push data into minio
-show preview
-preview in browser? 
+```
+
