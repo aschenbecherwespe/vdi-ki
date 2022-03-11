@@ -15,6 +15,3 @@ picam2.configure(preview_config)
 
 picam2.start()
 time.sleep(5)
-
-
-image = picam2.switch_mode_and_capture_image(capture_config)
