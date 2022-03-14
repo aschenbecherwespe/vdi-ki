@@ -1,0 +1,1 @@
+Tutorial for running AI vision system on Raspberry Pi, for VDI, 10.03.22 - 11.03.22.
